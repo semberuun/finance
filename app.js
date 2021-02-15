@@ -14,7 +14,8 @@ var uiController = (function () {
             return {
                 type: document.querySelector(DOMstring.inputType).value,
                 description: document.querySelector(DOMstring.inputDesc).value,
-                value: document.querySelector(DOMstring.inputValue).value
+                //тэмдэгт мөрийг тоо руу хөрвүүлэх parseInt();
+                value: parseInt(document.querySelector(DOMstring.inputValue).value)
             }
         },
         getDOMstrings: function () {
@@ -70,6 +71,15 @@ var financeController = (function () {
             this.value = value
     };
 
+    var calculateTotal = function (type) {
+        var sum = 0;
+        data.items[type].forEach(function (el) {
+            sum = sum + el.value;
+        });
+
+        data.totals[type] = sum;
+    };
+
     var data = {
         items: {
             inc: [],
@@ -79,9 +89,27 @@ var financeController = (function () {
         totals: {
             inc: 0,
             exp: 0
-        }
+        },
+        tusuv: 0,
+        huvi: 0
     };
     return {
+        tusuvTootsolooh: function () {
+            calculateTotal('inc');
+            calculateTotal('exp');
+
+            data.tusuv = data.totals.inc - data.totals.exp;
+            data.huvi = Math.round((data.totals.exp / data.totals.inc) * 100);
+        },
+        tosovAvah: function () {
+            return {
+                tusuv: data.tusuv,
+                huvi: data.huvi,
+                totalInc: data.totals.inc,
+                totalExp: data.totals.exp
+            }
+        },
+
         addItem: function (type, desc, val) {
             var item, id;
             if (data.items[type].length === 0) id = 1;
@@ -97,6 +125,9 @@ var financeController = (function () {
             data.items[type].push(item);
 
             return item;
+        },
+        seeData: function () {
+            return data;
         }
     };
 
@@ -110,15 +141,21 @@ var appController = (function (uiController, financeController) {
     var ctrlAddItem = function () {
         //1. оруулах өгөгдлийг дэлгэцээс авна
         var input = uiController.getInput();
+        if (input.description !== "" && input.value !== "") {
+            //2. олж авсан өгөгдлөө санхүүгийн талбарлуу дамжуулж тэнд хадгална
+            var item = financeController.addItem(input.type, input.description, input.value);
 
-        //2. олж авсан өгөгдлөө санхүүгийн талбарлуу дамжуулж тэнд хадгална
-        var item = financeController.addItem(input.type, input.description, input.value);
+            //3. олж авсан өгөгдлүүдийг вэб дээрээ тохирох хэсэгт нь гаргана
+            uiController.addListItem(item, input.type);
+            uiController.clearFields();
+            //4. төсвийг тооцоолно.
+            financeController.tusuvTootsolooh();
+            //5. эцсийн үлдэгдэл гаргана
+            var tusuv = financeController.tosovAvah();
+            //6. тооцоог дэлгэцэнд гаргах
+            console.log(tusuv);
+        };
 
-        //3. олж авсан өгөгдлүүдийг вэб дээрээ тохирох хэсэгт нь гаргана
-        uiController.addListItem(item, input.type);
-        uiController.clearFields();
-        //4. төсвийг тооцоолно.
-        //5. эцсийн үлдэгдэл тооцоог дэлгэцэнд гаргана
     }
     var setupEventListener = function () {
         var Dom = uiController.getDOMstrings();
