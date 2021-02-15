@@ -6,6 +6,8 @@ var uiController = (function () {
         inputDesc: '.add__description',
         inputValue: '.add__value',
         addBtn: '.add__btn',
+        incomeList: '.income__list',
+        expenseList: '.expenses__list'
     }
     return {
         getInput: function () {
@@ -19,14 +21,28 @@ var uiController = (function () {
             return DOMstring;
         },
 
+        clearFields: function () {
+            var fields = document.querySelectorAll(DOMstring.inputDesc + ',' + DOMstring.inputValue);
+            var fieldsArr = Array.prototype.slice.call(fields);
+
+            //For давталт
+            fieldsArr.forEach(function (el, index, array) {
+                el.value = "";
+            });
+            fieldsArr[0].focus();
+            // for (var i = 0; i < fieldsArr.length; i++) {
+            //     fieldsArr[i].value = "";
+            // };
+        },
+
         addListItem: function (item, type) {
             //Орлого зарлагыг агуулсан HTML бэлдэнэ
             var html, list;
             if (type === "inc") {
-                list = '.income__list';
+                list = DOMstring.incomeList;
                 html = '<div class="item clearfix" id="income-%id%"><div class="item__description">%DESCRIPTION%</div><div class="right clearfix"><div class="item__value">+ %VALUE%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
             } else {
-                list = '.expenses__list';
+                list = DOMstring.expenseList;
                 html = '<div class="item clearfix" id="expense-%id%"><div class="item__description">%DESCRIPTION%</div><div class="right clearfix"><div class="item__value">- %VALUE%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
             }
             //HTML дотроо орлого зарлагын утгуудыг REPLACE ашиглан өөрчилж өгнө
@@ -100,6 +116,7 @@ var appController = (function (uiController, financeController) {
 
         //3. олж авсан өгөгдлүүдийг вэб дээрээ тохирох хэсэгт нь гаргана
         uiController.addListItem(item, input.type);
+        uiController.clearFields();
         //4. төсвийг тооцоолно.
         //5. эцсийн үлдэгдэл тооцоог дэлгэцэнд гаргана
     }
