@@ -11,7 +11,8 @@ var uiController = (function () {
         tusuvLabel: '.budget__value',
         incomeLabel: '.budget__income--value',
         expenseLabel: '.budget__expenses--value',
-        persantageLabel: '.budget__expenses--percentage'
+        persantageLabel: '.budget__expenses--percentage',
+        containerDiv: '.container '
     }
     return {
         getInput: function () {
@@ -51,13 +52,13 @@ var uiController = (function () {
             var html, list;
             if (type === "inc") {
                 list = DOMstring.incomeList;
-                html = '<div class="item clearfix" id="income-%id%"><div class="item__description">%DESCRIPTION%</div><div class="right clearfix"><div class="item__value">+ %VALUE%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
+                html = '<div class="item clearfix" id="inc-%id%"><div class="item__description">%DESCRIPTION%</div><div class="right clearfix"><div class="item__value">+ %VALUE%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
             } else {
                 list = DOMstring.expenseList;
-                html = '<div class="item clearfix" id="expense-%id%"><div class="item__description">%DESCRIPTION%</div><div class="right clearfix"><div class="item__value">- %VALUE%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
+                html = '<div class="item clearfix" id="exp-%id%"><div class="item__description">%DESCRIPTION%</div><div class="right clearfix"><div class="item__value">- %VALUE%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
             }
             //HTML дотроо орлого зарлагын утгуудыг REPLACE ашиглан өөрчилж өгнө
-            html = html.replace('%ID%', item.id);
+            html = html.replace('%id%', item.id);
             html = html.replace('%DESCRIPTION%', item.description);
             html = html.replace('%VALUE%', item.value);
             // бэлтгэсэн HTML ээ DOM руу хийж өгнө
@@ -120,6 +121,16 @@ var financeController = (function () {
             }
         },
 
+        deleteItem: function (type, id) {
+            var ids = data.items[type].map(function (el) {
+                return el.id;
+            });
+            var index = ids.indexOf(id);
+            if (index !== -1) {
+                data.items[type].splice(index, 1);
+            }
+        },
+
         addItem: function (type, desc, val) {
             var item, id;
             if (data.items[type].length === 0) id = 1;
@@ -179,6 +190,16 @@ var appController = (function (uiController, financeController) {
         document.addEventListener('keypress', function (event) {
             if (event.keyCode === 13 || event.which === 13) {
                 ctrlAddItem();
+            }
+        });
+        document.querySelector(Dom.containerDiv).addEventListener('click', function (event) {
+            var id = event.target.parentNode.parentNode.parentNode.parentNode.id;
+            if (id) {
+                var arr = id.split("-");
+                var type = arr[0];
+                var itemId = parseInt(arr[1]);
+
+                financeController.deleteItem(type, itemId);
             }
         });
     }
