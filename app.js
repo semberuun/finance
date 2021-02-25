@@ -47,6 +47,12 @@ var uiController = (function () {
             document.querySelector(DOMstring.persantageLabel).textContent = tusuv.huvi + '%';
         },
 
+        deleteListItem: function (id) {
+            var el = document.getElementById(id);
+            el.parentNode.removeChild(el);
+        },
+
+
         addListItem: function (item, type) {
             //Орлого зарлагыг агуулсан HTML бэлдэнэ
             var html, list;
@@ -169,16 +175,18 @@ var appController = (function (uiController, financeController) {
             //3. олж авсан өгөгдлүүдийг вэб дээрээ тохирох хэсэгт нь гаргана
             uiController.addListItem(item, input.type);
             uiController.clearFields();
-            //4. төсвийг тооцоолно.
-            financeController.tusuvTootsolooh();
-            //5. эцсийн үлдэгдэл гаргана
-            var tusuv = financeController.tosovAvah();
-            //6. тооцоог дэлгэцэнд гаргах
-            uiController.tusviigUzuuleh(tusuv);
-            // console.log(tusuv);
+            updateTusuv();
         };
-
     }
+    var updateTusuv = function () {
+        //4. төсвийг тооцоолно.
+        financeController.tusuvTootsolooh();
+        //5. эцсийн үлдэгдэл гаргана
+        var tusuv = financeController.tosovAvah();
+        //6. тооцоог дэлгэцэнд гаргах
+        uiController.tusviigUzuuleh(tusuv);
+    }
+
     var setupEventListener = function () {
         var Dom = uiController.getDOMstrings();
         //товч дарах хэсэг
@@ -198,8 +206,12 @@ var appController = (function (uiController, financeController) {
                 var arr = id.split("-");
                 var type = arr[0];
                 var itemId = parseInt(arr[1]);
-
+                //Санхүүгийн модулиас type, id ашиглан устгах
                 financeController.deleteItem(type, itemId);
+                //Дэлгэцэн дээрээс энэ элемент ашиглан устгах
+                uiController.deleteListItem(id);
+                //Үлдэгдэл тооцоог шинчилж харуулах
+                updateTusuv();
             }
         });
     }
