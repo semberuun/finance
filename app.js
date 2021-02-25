@@ -78,14 +78,23 @@ var uiController = (function () {
 //-------------------Санхүүтэй ажиллах талбар--------------------------------
 var financeController = (function () {
     var Income = function (id, description, value) {
-        this.id = id,
-            this.description = description,
-            this.value = value
+        this.id = id;
+        this.description = description;
+        this.value = value;
     };
     var Expense = function (id, description, value) {
-        this.id = id,
-            this.description = description,
-            this.value = value
+        this.id = id;
+        this.description = description;
+        this.value = value;
+        this.persentage = -1;
+    };
+    Expense.prototype.calcPercentage = function (totalIncome) {
+        if (totalIncome > 0)
+            this.persentage = Math.round((this.value / totalIncome) * 100);
+        else this.persentage = 0;
+    };
+    Expense.prototype.getPercentage = function () {
+        return this.persentage;
     };
 
     var calculateTotal = function (type) {
@@ -116,7 +125,21 @@ var financeController = (function () {
             calculateTotal('exp');
 
             data.tusuv = data.totals.inc - data.totals.exp;
-            data.huvi = Math.round((data.totals.exp / data.totals.inc) * 100);
+            if (data.totals.inc > 0)
+                data.huvi = Math.round((data.totals.exp / data.totals.inc) * 100);
+            else data.huvi = 0;
+        },
+        calculatePercentages: function () {
+            data.items.exp.forEach(function (el) {
+                el.calcPercentage(data.totals.inc);
+            });
+        },
+        getPercentages: function () {
+            var allPercentages = data.items.exp.map(function (el) {
+                return el.getPercentage();
+            });
+
+            return allPercentages;
         },
         tosovAvah: function () {
             return {
@@ -181,10 +204,21 @@ var appController = (function (uiController, financeController) {
     var updateTusuv = function () {
         //4. төсвийг тооцоолно.
         financeController.tusuvTootsolooh();
+
         //5. эцсийн үлдэгдэл гаргана
         var tusuv = financeController.tosovAvah();
+
         //6. тооцоог дэлгэцэнд гаргах
         uiController.tusviigUzuuleh(tusuv);
+
+        // элементүүдийн хувийг тодорхойлно
+        financeController.calculatePercentages();
+
+        //элементүүдийг хувийг хүлээж авна
+        var allPercentages = financeController.getPercentages();
+
+        //эдгээр хувийг дэлгэцэнд гаргана
+        console.log(allPercentages);
     }
 
     var setupEventListener = function () {
